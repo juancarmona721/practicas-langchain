@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinBot - Tu Asistente Financiero Inteligente</title>
+    <meta name="description" content="Interfaz premium interactiva para conversar con FinBot, tu consultor financiero inteligente impulsado por IA.">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar para Herramientas y Estado -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-icon-bg">
+                        <i data-lucide="trending-up" class="logo-icon"></i>
+                    </div>
+                    <div>
+                        <h1 class="logo-title">Fin<span>Bot</span></h1>
+                        <span class="logo-subtitle">IA Financiera</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Estado del Agente -->
+            <div class="agent-status-panel">
+                <div class="status-indicator-container">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">Agente FinBot Activo</span>
+                </div>
+                <p class="status-desc">Listo para analizar tus finanzas, calcular rendimientos y consultar mercados en tiempo real.</p>
+            </div>
+
+            <!-- Ticker de Bitcoin en tiempo real -->
+            <div class="tool-card btc-ticker">
+                <div class="tool-card-header">
+                    <div class="tool-icon-wrapper btc-icon">
+                        <i data-lucide="coins"></i>
+                    </div>
+                    <div>
+                        <span class="tool-title">Precio Bitcoin (BTC)</span>
+                        <span class="tool-source">Binance API</span>
+                    </div>
+                </div>
+                <div class="btc-price-container">
+                    <span class="btc-symbol">$</span>
+                    <span id="btc-price" class="btc-value">Cargando...</span>
+                    <span class="btc-currency">USDT</span>
+                </div>
+                <div class="btc-change-indicator positive">
+                    <i data-lucide="arrow-up-right" class="mini-icon"></i>
+                    <span id="btc-change">+--% hoy</span>
+                </div>
+            </div>
+
+            <!-- Widget Simulador de Interés Compuesto -->
+            <div class="tool-card interest-calculator">
+                <div class="tool-card-header">
+                    <div class="tool-icon-wrapper calc-icon">
+                        <i data-lucide="calculator"></i>
+                    </div>
+                    <div>
+                        <span class="tool-title">Interés Compuesto</span>
+                        <span class="tool-source">Herramienta Local</span>
+                    </div>
+                </div>
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <label for="calc-principal">Principal ($)</label>
+                        <input type="number" id="calc-principal" value="10000" placeholder="Ej: 10000">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="calc-rate">Tasa (% anual)</label>
+                            <input type="number" id="calc-rate" value="5" placeholder="Ej: 5">
+                        </div>
+                        <div class="input-group">
+                            <label for="calc-years">Años</label>
+                            <input type="number" id="calc-years" value="3" placeholder="Ej: 3">
+                        </div>
+                    </div>
+                    <button id="btn-run-calc" class="btn-secondary">
+                        <span>Calcular Simulación</span>
+                        <i data-lucide="calculator" class="btn-icon-right"></i>
+                    </button>
+                </div>
+                <div id="calc-result" class="calc-result hidden">
+                    <!-- Resultados inyectados por JS -->
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Desarrollado para FinBot Agent</p>
+                <div class="api-badge">API de Pruebas</div>
+            </div>
+        </aside>
+
+        <!-- Contenedor Principal de Chat -->
+        <main class="chat-container">
+            <!-- Encabezado del Chat -->
+            <header class="chat-header">
+                <div class="chat-agent-info">
+                    <div class="agent-avatar">
+                        <i data-lucide="bot"></i>
+                        <span class="avatar-online-dot"></span>
+                    </div>
+                    <div>
+                        <h2 class="agent-name">FinBot Asistente</h2>
+                        <div class="agent-capabilities">
+                            <span class="cap-tag"><i data-lucide="zap" class="cap-icon"></i> LangGraph</span>
+                            <span class="cap-tag"><i data-lucide="shield-check" class="cap-icon"></i> Modo Consultivo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="btn-clear-chat" title="Limpiar historial" class="btn-icon-only">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                    <button id="btn-toggle-info" title="Información del backend" class="btn-icon-only">
+                        <i data-lucide="code"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Zona de Mensajes de Chat -->
+            <section id="chat-messages" class="chat-messages">
+                <!-- Tarjeta de Bienvenida inicial -->
+                <div class="welcome-card" id="welcome-card">
+                    <div class="welcome-icon-wrapper">
+                        <i data-lucide="piggy-bank"></i>
+                    </div>
+                    <h3>¡Bienvenido a FinBot!</h3>
+                    <p>Soy tu asistente inteligente especializado en finanzas personales, análisis de inversión y soporte. ¿De qué te gustaría hablar hoy?</p>
+                    
+                    <div class="suggested-questions">
+                        <span class="suggestion-title">Preguntas sugeridas:</span>
+                        <div class="suggestions-grid">
+                            <button class="suggestion-btn" data-query="¿Cuál es el precio actual de Bitcoin?">
+                                <i data-lucide="coins" class="sug-icon"></i>
+                                <span>¿Cuál es el precio de Bitcoin?</span>
+                            </button>
+                            <button class="suggestion-btn" data-query="Calcula el interés de una inversión de $10000 al 8% por 5 años">
+                                <i data-lucide="percent" class="sug-icon"></i>
+                                <span>Calcular inversión de $10k al 8%</span>
+                            </button>
+                            <button class="suggestion-btn" data-query="¿Cómo puedo crear un presupuesto mensual efectivo?">
+                                <i data-lucide="wallet" class="sug-icon"></i>
+                                <span>¿Cómo crear un presupuesto?</span>
+                            </button>
+                            <button class="suggestion-btn" data-query="¿Qué productos y herramientas ofrece FinBot?">
+                                <i data-lucide="help-circle" class="sug-icon"></i>
+                                <span>Productos de FinBot</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Los mensajes de chat se inyectarán dinámicamente aquí -->
+            </section>
+
+            <!-- Panel de Grabación de Voz -->
+            <div id="voice-overlay" class="voice-overlay hidden">
+                <div class="voice-overlay-content">
+                    <div class="waveform-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="voice-timer">00:00</div>
+                    <p class="voice-status-text">Grabando tu consulta para FinBot...</p>
+                    <div class="voice-actions">
+                        <button id="btn-cancel-voice" class="btn-voice-action btn-cancel">
+                            <i data-lucide="x"></i>
+                            <span>Cancelar</span>
+                        </button>
+                        <button id="btn-send-voice" class="btn-voice-action btn-send-audio">
+                            <i data-lucide="check"></i>
+                            <span>Enviar Audio</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entrada de Chat (Formulario) -->
+            <footer class="chat-input-container">
+                <form id="chat-form" class="chat-form">
+                    <button type="button" id="btn-mic" class="btn-mic" title="Grabar consulta por voz">
+                        <i data-lucide="mic"></i>
+                    </button>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="user-input" 
+                            placeholder="Escribe un mensaje aquí o usa el micrófono..." 
+                            rows="1"
+                            autocomplete="off"
+                        ></textarea>
+                    </div>
+                    <button type="submit" id="btn-send" class="btn-send" title="Enviar mensaje">
+                        <i data-lucide="send"></i>
+                    </button>
+                </form>
+                <div class="input-footer-note">
+                    FinBot recopila datos solo con fines informativos. Consulta con un asesor financiero certificado.
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Modal de Información de Backend -->
+    <div id="backend-info-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="code" class="modal-header-icon"></i> Conectar con Backend Python</h3>
+                <button id="btn-close-modal" class="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Esta interfaz está lista para comunicarse directamente con tu script <code>agentesimple.py</code>.</p>
+                
+                <h4>1. Habilitar CORS en FastAPI</h4>
+                <p>Debes permitir solicitudes cruzadas (CORS) agregando esto en <code>agentesimple.py</code>:</p>
+                <pre><code>from fastapi.middleware.cors import CORSMiddleware
+
+# ... (debajo de app = FastAPI())
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)</code></pre>
+
+                <h4>2. Conexiones Disponibles en <code>app.js</code></h4>
+                <ul>
+                    <li><code>enviarMensajeAlBackend(mensaje)</code> conecta con <code>GET /chat?mensaje_usuario=...</code></li>
+                    <li><code>enviarAudioAlBackend(blobAudio)</code> conecta con <code>POST /chat/audio</code></li>
+                </ul>
+
+                <div class="note-box">
+                    <strong>Servir desde FastAPI:</strong> Si quieres que el mismo backend sirva el frontend:
+                    <pre><code>from fastapi.staticfiles import StaticFiles
+
+# Al final de agentesimple.py:
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
