@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- CONFIGURACIÓN DE CONEXIÓN BACKEND ---
     // Cambia 'usarMock' a 'false' una vez que quieras conectar con tu servidor de Python
     const CONFIG = {
-        usarMock: true, 
+        usarMock: false, 
         backendUrl: "http://localhost:8000" // Ajusta a tu puerto de FastAPI (por defecto 8000)
     };
 

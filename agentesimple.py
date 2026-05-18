@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 from openai import OpenAI
@@ -15,8 +15,19 @@ import requests
 # 1. Configuraciones iniciales
 load_dotenv()
 app = FastAPI()
+
+# Configurar middleware de CORS para conectar el frontend web
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 memoria_chat = []
-cliente_openai = OpenAI
+cliente_openai = OpenAI()
 
 # 2. Cerebro base
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
