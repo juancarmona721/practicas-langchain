@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinBot - Tu Asistente Financiero Inteligente</title>
-    <meta name="description" content="Interfaz premium interactiva para conversar con FinBot, tu consultor financiero inteligente impulsado por IA.">
+    <meta name="description"
+        content="Interfaz premium interactiva para conversar con FinBot, tu consultor financiero inteligente impulsado por IA.">
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar para Herramientas y Estado -->
@@ -36,7 +40,8 @@
                     <span class="pulse-dot"></span>
                     <span class="status-text">Agente FinBot Activo</span>
                 </div>
-                <p class="status-desc">Listo para analizar tus finanzas, calcular rendimientos y consultar mercados en tiempo real.</p>
+                <p class="status-desc">Listo para analizar tus finanzas, calcular rendimientos y consultar mercados en
+                    tiempo real.</p>
             </div>
 
             <!-- Ticker de Bitcoin en tiempo real -->
@@ -116,7 +121,8 @@
                         <h2 class="agent-name">FinBot Asistente</h2>
                         <div class="agent-capabilities">
                             <span class="cap-tag"><i data-lucide="zap" class="cap-icon"></i> LangGraph</span>
-                            <span class="cap-tag"><i data-lucide="shield-check" class="cap-icon"></i> Modo Consultivo</span>
+                            <span class="cap-tag"><i data-lucide="shield-check" class="cap-icon"></i> Modo
+                                Consultivo</span>
                         </div>
                     </div>
                 </div>
@@ -138,8 +144,9 @@
                         <i data-lucide="piggy-bank"></i>
                     </div>
                     <h3>¡Bienvenido a FinBot!</h3>
-                    <p>Soy tu asistente inteligente especializado en finanzas personales, análisis de inversión y soporte. ¿De qué te gustaría hablar hoy?</p>
-                    
+                    <p>Soy tu asistente inteligente especializado en finanzas personales, análisis de inversión y
+                        soporte. ¿De qué te gustaría hablar hoy?</p>
+
                     <div class="suggested-questions">
                         <span class="suggestion-title">Preguntas sugeridas:</span>
                         <div class="suggestions-grid">
@@ -147,11 +154,13 @@
                                 <i data-lucide="coins" class="sug-icon"></i>
                                 <span>¿Cuál es el precio de Bitcoin?</span>
                             </button>
-                            <button class="suggestion-btn" data-query="Calcula el interés de una inversión de $10000 al 8% por 5 años">
+                            <button class="suggestion-btn"
+                                data-query="Calcula el interés de una inversión de $10000 al 8% por 5 años">
                                 <i data-lucide="percent" class="sug-icon"></i>
                                 <span>Calcular inversión de $10k al 8%</span>
                             </button>
-                            <button class="suggestion-btn" data-query="¿Cómo puedo crear un presupuesto mensual efectivo?">
+                            <button class="suggestion-btn"
+                                data-query="¿Cómo puedo crear un presupuesto mensual efectivo?">
                                 <i data-lucide="wallet" class="sug-icon"></i>
                                 <span>¿Cómo crear un presupuesto?</span>
                             </button>
@@ -200,17 +209,28 @@
 
             <!-- Entrada de Chat (Formulario) -->
             <footer class="chat-input-container">
+                <!-- Selector de modo de respuesta: Texto o Voz (Toggle) -->
+                <div class="response-mode-container">
+                    <span class="mode-label">Respuesta de FinBot:</span>
+                    <div class="mode-selector">
+                        <button type="button" id="mode-text-btn" class="mode-btn active" data-mode="texto">
+                            <i data-lucide="message-square" class="mini-icon"></i>
+                            <span>Texto</span>
+                        </button>
+                        <button type="button" id="mode-voice-btn" class="mode-btn" data-mode="voz">
+                            <i data-lucide="volume-2" class="mini-icon"></i>
+                            <span>Voz (TTS)</span>
+                        </button>
+                    </div>
+                </div>
+
                 <form id="chat-form" class="chat-form">
                     <button type="button" id="btn-mic" class="btn-mic" title="Grabar consulta por voz">
                         <i data-lucide="mic"></i>
                     </button>
                     <div class="input-wrapper">
-                        <textarea 
-                            id="user-input" 
-                            placeholder="Escribe un mensaje aquí o usa el micrófono..." 
-                            rows="1"
-                            autocomplete="off"
-                        ></textarea>
+                        <textarea id="user-input" placeholder="Escribe un mensaje aquí o usa el micrófono..." rows="1"
+                            autocomplete="off"></textarea>
                     </div>
                     <button type="submit" id="btn-send" class="btn-send" title="Enviar mensaje">
                         <i data-lucide="send"></i>
@@ -231,8 +251,9 @@
                 <button id="btn-close-modal" class="btn-close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Esta interfaz está lista para comunicarse directamente con tu script <code>agentesimple.py</code>.</p>
-                
+                <p>Esta interfaz está lista para comunicarse directamente con tu script <code>agentesimple.py</code>.
+                </p>
+
                 <h4>1. Habilitar CORS en FastAPI</h4>
                 <p>Debes permitir solicitudes cruzadas (CORS) agregando esto en <code>agentesimple.py</code>:</p>
                 <pre><code>from fastapi.middleware.cors import CORSMiddleware
@@ -248,7 +269,8 @@ app.add_middleware(
 
                 <h4>2. Conexiones Disponibles en <code>app.js</code></h4>
                 <ul>
-                    <li><code>enviarMensajeAlBackend(mensaje)</code> conecta con <code>GET /chat?mensaje_usuario=...</code></li>
+                    <li><code>enviarMensajeAlBackend(mensaje)</code> conecta con
+                        <code>GET /chat?mensaje_usuario=...</code></li>
                     <li><code>enviarAudioAlBackend(blobAudio)</code> conecta con <code>POST /chat/audio</code></li>
                 </ul>
 
@@ -266,4 +288,5 @@ app.mount("/", StaticFiles(directory="frontend", html=True), name="static")</cod
     <!-- Custom JS -->
     <script src="app.js"></script>
 </body>
+
 </html>

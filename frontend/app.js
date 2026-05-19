@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------
-   FINBOT FRONTEND INTERACTIVE CONTROLLER
+   FINBOT FRONTEND INTERACTIVE CONTROLLER (REAL VOICE AGENT)
    ------------------------------------------------------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -7,10 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     lucide.createIcons();
 
     // --- CONFIGURACIÓN DE CONEXIÓN BACKEND ---
-    // Cambia 'usarMock' a 'false' una vez que quieras conectar con tu servidor de Python
     const CONFIG = {
-        usarMock: false, 
-        backendUrl: "http://localhost:8000" // Ajusta a tu puerto de FastAPI (por defecto 8000)
+        backendUrl: "http://localhost:8000" // Puerto por defecto de FastAPI
     };
 
     // --- SELECCIÓN DE ELEMENTOS DOM ---
@@ -20,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const welcomeCard = document.getElementById("welcome-card");
     const btnMic = document.getElementById("btn-mic");
     const btnSend = document.getElementById("btn-send");
-    
+
     // Ticker BTC
     const btcPriceEl = document.getElementById("btc-price");
     const btcChangeEl = document.getElementById("btc-change");
@@ -37,20 +35,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCancelVoice = document.getElementById("btn-cancel-voice");
     const btnSendVoice = document.getElementById("btn-send-voice");
     const voiceTimer = document.querySelector(".voice-timer");
-    
+
     // Modal Informativo
     const backendInfoModal = document.getElementById("backend-info-modal");
     const btnToggleInfo = document.getElementById("btn-toggle-info");
     const btnCloseModal = document.getElementById("btn-close-modal");
     const btnClearChat = document.getElementById("btn-clear-chat");
 
+    // --- SELECCIÓN DEL MODO DE RESPUESTA (TEXTO O VOZ) ---
+    const modeTextBtn = document.getElementById("mode-text-btn");
+    const modeVoiceBtn = document.getElementById("mode-voice-btn");
+
     // --- VARIABLES DE ESTADO ---
     let grabacionInterval = null;
     let grabacionSegundos = 0;
     let btcActualPrice = "96,250.00"; // Fallback inicial
+    let responseMode = "texto"; // Modo activo por defecto ("texto" o "voz")
+
+    // Variables para Grabación Real del Micrófono (MediaRecorder API)
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let audioStream = null;
+
+    // --- MANEJO DEL SELECTOR DE MODO ---
+    if (modeTextBtn && modeVoiceBtn) {
+        modeTextBtn.addEventListener("click", () => {
+            responseMode = "texto";
+            modeTextBtn.classList.add("active");
+            modeVoiceBtn.classList.remove("active");
+        });
+
+        modeVoiceBtn.addEventListener("click", () => {
+            responseMode = "voz";
+            modeVoiceBtn.classList.add("active");
+            modeTextBtn.classList.remove("active");
+        });
+    }
 
     // Auto-ajustar altura del textarea de chat al escribir
-    userInput.addEventListener("input", function() {
+    userInput.addEventListener("input", function () {
         this.style.height = "auto";
         this.style.height = (this.scrollHeight - 4) + "px";
         if (this.value.trim() !== "") {
@@ -67,14 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
                 const precioFloat = parseFloat(data.lastPrice);
                 const cambioFloat = parseFloat(data.priceChangePercent);
-                
+
                 btcActualPrice = precioFloat.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 btcPriceEl.textContent = btcActualPrice;
-                
+
                 // Formatear porcentaje
                 const prefijo = cambioFloat >= 0 ? "+" : "";
                 btcChangeEl.textContent = `${prefijo}${cambioFloat.toFixed(2)}% hoy`;
-                
+
                 // Ajustar colores del indicador
                 const parent = btcChangeEl.parentElement;
                 if (cambioFloat >= 0) {
@@ -120,8 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 3. LÓGICA DE MENSAJES EN CHAT ---
 
-    // Agregar mensaje visualmente en la zona de chat
-    function agregarMensajeAlChat(remitente, texto, audioSrc = null) {
+    // Agregar mensaje visualmente en la zona de chat con soporte de reproducción real de audio y herramientas usadas
+    function agregarMensajeAlChat(remitente, texto, audioSrc = null, herramientas = []) {
         // Ocultar tarjeta de bienvenida al primer mensaje
         if (welcomeCard) {
             welcomeCard.style.display = "none";
@@ -135,20 +158,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let contenidoHTML = `
             <div class="message-bubble">
+        `;
+
+        // Si es el agente y usó herramientas, mostrar los badges
+        if (remitente === "agent" && herramientas && herramientas.length > 0) {
+            contenidoHTML += `<div class="tool-badge-container">`;
+            herramientas.forEach(tool => {
+                let nombreLegible = tool;
+                let icono = "wrench";
+                if (tool === "obtener_precio_bitcoin") {
+                    nombreLegible = "Binance API (Bitcoin)";
+                    icono = "trending-up";
+                } else if (tool === "calcular_interes") {
+                    nombreLegible = "Calculadora (Interés Compuesto)";
+                    icono = "calculator";
+                } else if (tool === "consultar_info_nequi") {
+                    nombreLegible = "Base Vectorial Nequi (RAG)";
+                    icono = "database";
+                }
+                contenidoHTML += `
+                    <span class="tool-badge" title="Herramienta ejecutada de forma autónoma">
+                        <i data-lucide="${icono}" class="badge-icon"></i>
+                        <span>Herramienta: <strong>${nombreLegible}</strong></span>
+                    </span>
+                `;
+            });
+            contenidoHTML += `</div>`;
+        }
+
+        contenidoHTML += `
                 <div class="message-text">${formatearTextoMarkdown(texto)}</div>
         `;
 
-        // Si incluye audio (simulación de respuesta de voz)
+        // Si incluye audio real sintetizado por el backend
         if (audioSrc) {
             contenidoHTML += `
                 <div class="audio-player-container">
-                    <button class="btn-play-audio" title="Reproducir respuesta">
+                    <button type="button" class="btn-play-audio" title="Reproducir respuesta">
                         <i data-lucide="play" class="play-icon"></i>
                     </button>
                     <div class="audio-progress-bar">
-                        <div class="audio-progress"></div>
+                        <div class="audio-progress" style="width: 0%;"></div>
                     </div>
-                    <span class="audio-time">0:04</span>
+                    <span class="audio-time">0:00</span>
                 </div>
             `;
         }
@@ -160,40 +212,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
         messageRow.innerHTML = contenidoHTML;
         chatMessages.appendChild(messageRow);
-        
+
         // Re-inicializar iconos dentro del nuevo mensaje
         lucide.createIcons();
-        
+
         // Auto-scroll al final
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Registrar evento de audio si existe reproductor
+        // Registrar evento de audio real si existe
         if (audioSrc) {
+            const audioUrl = `${CONFIG.backendUrl}/audio/${audioSrc}`;
             const playBtn = messageRow.querySelector(".btn-play-audio");
             const progress = messageRow.querySelector(".audio-progress");
+            const timeSpan = messageRow.querySelector(".audio-time");
+            
+            const audio = new Audio(audioUrl);
             let reproduciendo = false;
+            
+            audio.addEventListener("timeupdate", () => {
+                if (audio.duration) {
+                    const pct = (audio.currentTime / audio.duration) * 100;
+                    progress.style.width = `${pct}%`;
+                    
+                    const curMin = Math.floor(audio.currentTime / 60);
+                    const curSec = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+                    timeSpan.textContent = `${curMin}:${curSec}`;
+                }
+            });
+            
+            audio.addEventListener("loadedmetadata", () => {
+                const durMin = Math.floor(audio.duration / 60);
+                const durSec = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+                timeSpan.textContent = `${durMin}:${durSec}`;
+            });
+            
+            audio.addEventListener("ended", () => {
+                reproduciendo = false;
+                const icon = playBtn.querySelector("i");
+                if (icon) {
+                    icon.setAttribute("data-lucide", "play");
+                    lucide.createIcons();
+                }
+                progress.style.width = "0%";
+            });
             
             playBtn.addEventListener("click", () => {
                 reproduciendo = !reproduciendo;
                 const icon = playBtn.querySelector("i");
                 if (reproduciendo) {
-                    icon.setAttribute("data-lucide", "pause");
-                    progress.style.width = "100%";
-                    progress.style.transition = "width 4s linear";
-                    setTimeout(() => {
-                        icon.setAttribute("data-lucide", "play");
-                        progress.style.width = "0%";
-                        progress.style.transition = "none";
-                        reproduciendo = false;
-                        lucide.createIcons();
-                    }, 4000);
+                    // Detener otros audios que se estén reproduciendo actualmente
+                    document.querySelectorAll('audio').forEach(el => el.pause());
+                    
+                    audio.play();
+                    if (icon) icon.setAttribute("data-lucide", "pause");
                 } else {
-                    icon.setAttribute("data-lucide", "play");
-                    progress.style.width = "40%";
-                    progress.style.transition = "var(--transition-fast)";
+                    audio.pause();
+                    if (icon) icon.setAttribute("data-lucide", "play");
                 }
                 lucide.createIcons();
             });
+            
+            // Intentar autoreproducción al cargar el mensaje (Premium Experience)
+            audio.play().catch(e => {
+                console.log("Autoplay bloqueado por el navegador. Requiere acción del usuario.", e);
+                reproduciendo = false;
+                const icon = playBtn.querySelector("i");
+                if (icon) icon.setAttribute("data-lucide", "play");
+                lucide.createIcons();
+            });
+            
+            if (reproduciendo) {
+                setTimeout(() => {
+                    const icon = playBtn.querySelector("i");
+                    if (icon) {
+                        icon.setAttribute("data-lucide", "pause");
+                        lucide.createIcons();
+                    }
+                }, 100);
+            }
         }
     }
 
@@ -231,37 +327,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- 4. INTEGRACIÓN DIRECTA CON EL BACKEND FASTAPI (PYTHON) ---
-    
-    // Función para enviar mensaje de texto al backend FastAPI
-    async function enviarMensajeAlBackend(mensaje) {
-        if (CONFIG.usarMock) {
-            return resolverMockRespuesta(mensaje);
-        }
 
+    // Función para enviar mensaje de texto al backend FastAPI con soporte de modo
+    async function enviarMensajeAlBackend(mensaje) {
         try {
-            // GET /chat?mensaje_usuario=...
-            const url = `${CONFIG.backendUrl}/chat?mensaje_usuario=${encodeURIComponent(mensaje)}`;
+            // GET /chat?mensaje_usuario=...&modo=...
+            const url = `${CONFIG.backendUrl}/chat?mensaje_usuario=${encodeURIComponent(mensaje)}&modo=${responseMode}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error("Error en la respuesta del backend");
-            
+
             const data = await response.json();
-            return data.finbot; // Retorna la respuesta del agente
+            return {
+                finbot: data.finbot,
+                archivo_audio: data.archivo_audio,
+                herramientas_usadas: data.herramientas_usadas || []
+            };
         } catch (error) {
             console.error("Error contactando backend FastAPI:", error);
-            return "⚠️ **Error de Conexión:** No se pudo conectar con el backend de Python en `localhost:8000`. Asegúrate de que `uvicorn agentesimple:app --reload` esté ejecutándose y que CORS esté habilitado en FastAPI.";
+            return {
+                finbot: "⚠️ **Error de Conexión:** No se pudo conectar con el backend de Python en `localhost:8000`. Asegúrate de que `uvicorn agentesimple:app --reload` esté ejecutándose y que CORS esté habilitado en FastAPI.",
+                archivo_audio: null
+            };
         }
     }
 
     // Función para enviar archivo de audio grabado al backend FastAPI
     async function enviarAudioAlBackend(audioBlob) {
-        if (CONFIG.usarMock) {
-            return {
-                transcripcion: "Simulación de consulta por voz de prueba financiera.",
-                respuesta: "He recibido tu consulta por nota de voz. Como tu asistente virtual FinBot, te confirmo que la transcripción es correcta y estoy listo para darte soporte sobre finanzas. Esta es una simulación visual premium.",
-                conAudio: true
-            };
-        }
-
         try {
             // POST /chat/audio con FormData conteniendo el archivo
             const formData = new FormData();
@@ -274,42 +365,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) throw new Error("Error al enviar audio al servidor");
             const data = await response.json();
-            
+
             return {
                 transcripcion: data.transcripcion_usuario,
                 respuesta: data.texto_finbot,
-                conAudio: true // Para simular la respuesta vocal
+                archivo_audio: data.archivo_audio,
+                herramientas_usadas: data.herramientas_usadas || []
             };
         } catch (error) {
             console.error("Error al procesar audio en el servidor:", error);
             return {
                 transcripcion: "[Audio enviado]",
                 respuesta: "⚠️ **Error de audio en backend:** El servidor de audio no pudo procesar tu archivo. Verifica que tengas configuradas las API keys de OpenAI (para Whisper y TTS) y que tu FastAPI esté activo con CORS.",
-                conAudio: false
+                archivo_audio: null
             };
         }
-    }
-
-    // --- 5. LÓGICA DE SIMULACIONES MOCK (Para pruebas rápidas de Front) ---
-    function resolverMockRespuesta(mensaje) {
-        const msgLower = mensaje.toLowerCase();
-        
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                if (msgLower.includes("bitcoin") || msgLower.includes("btc")) {
-                    resolve(`El precio actual de **Bitcoin (BTC)** es de **$${btcActualPrice} USDT** según la API de Binance en tiempo real. 📈\n\n¿Te gustaría que hagamos una simulación de inversión compuesta o analicemos tendencias?`);
-                } else if (msgLower.includes("interés") || msgLower.includes("calcula")) {
-                    // Detectar si hay números para una respuesta inteligente
-                    resolve(`¡Excelente pregunta sobre inversión! Utilizando la herramienta de **Interés Compuesto** de FinBot:\n\nSi inviertes un principal inicial con una tasa anual acumulativa, tus intereses generarán nuevos intereses a lo largo de los años. Puedes realizar cualquier simulación usando la calculadora integrada en el panel izquierdo de esta pantalla de manera instantánea.`);
-                } else if (msgLower.includes("presupuesto") || msgLower.includes("ahorro")) {
-                    resolve(`Para crear un presupuesto mensual altamente efectivo, te sugiero la **regla del 50/30/20**:\n\n*   **50%** para tus necesidades básicas (vivienda, servicios, comida).\n*   **30%** para tus gustos personales (entretenimiento, salidas).\n*   **20%** directo a tu fondo de ahorro o inversión.\n\n¿Tienes alguna meta de ahorro específica que quieras evaluar?`);
-                } else if (msgLower.includes("productos") || msgLower.includes("herramientas") || msgLower.includes("finbot")) {
-                    resolve(`En **FinBot** te ofrecemos diversas herramientas:\n1. **Consulta de Precios Cripto:** Precios en tiempo real integrados con mercados internacionales.\n2. **Calculador de Rendimiento Compuesto:** Para evaluar planes de inversión.\n3. **Asesoría de Ahorro Inteligente:** Consejos personalizados y adaptados a tu idioma actual.\n\nTodo esto controlado mediante nuestro orquestador financiero inteligente.`);
-                } else {
-                    resolve(`He recibido tu mensaje: "${mensaje}".\n\nComo tu asistente financiero **FinBot**, estoy aquí para ayudarte con cualquier consulta sobre finanzas personales, análisis de inversión o soporte técnico de nuestros servicios financieros.`);
-                }
-            }, 1200);
-        });
     }
 
     // --- 6. EVENTOS DE ENVÍO DE FORMULARIO ---
@@ -329,12 +399,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // 2. Indicador de Escritura de FinBot
         mostrarIndicadorEscritura();
 
-        // 3. Obtener Respuesta (Backend o Mock)
-        const respuestaBot = await enviarMensajeAlBackend(texto);
+        // 3. Obtener Respuesta del Backend
+        const resultado = await enviarMensajeAlBackend(texto);
 
         // 4. Remover Indicador y Mostrar Respuesta
         removerIndicadorEscritura();
-        agregarMensajeAlChat("agent", respuestaBot);
+        agregarMensajeAlChat("agent", resultado.finbot, resultado.archivo_audio, resultado.herramientas_usadas);
     });
 
     // Permitir enviar con la tecla Enter (sin Shift)
@@ -354,54 +424,95 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- 7. SIMULACIÓN DE GRABACIÓN DE VOZ (MICROFONO) ---
-    btnMic.addEventListener("click", () => {
-        // Abrir panel de grabación de voz
-        voiceOverlay.classList.remove("hidden");
-        grabacionSegundos = 0;
-        voiceTimer.textContent = "00:00";
-        
-        // Iniciar temporizador visual
-        grabacionInterval = setInterval(() => {
-            grabacionSegundos++;
-            const minutos = Math.floor(grabacionSegundos / 60).toString().padStart(2, '0');
-            const segundos = (grabacionSegundos % 60).toString().padStart(2, '0');
-            voiceTimer.textContent = `${minutos}:${segundos}`;
-        }, 1000);
+    // --- 7. GRABACIÓN REAL DE AUDIO (MICROFONO) VIA MEDIARECORDER API ---
+    btnMic.addEventListener("click", async () => {
+        try {
+            audioChunks = [];
+            // Solicitar permisos de micrófono reales al navegador
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Instanciar grabador real
+            mediaRecorder = new MediaRecorder(audioStream);
+            
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    audioChunks.push(e.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                // Liberar el hardware del micrófono al detener la grabación
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                }
+            };
+
+            // Iniciar grabación real
+            mediaRecorder.start();
+
+            // Abrir panel de grabación visual en pantalla
+            voiceOverlay.classList.remove("hidden");
+            grabacionSegundos = 0;
+            voiceTimer.textContent = "00:00";
+
+            // Iniciar temporizador visual de segundos
+            grabacionInterval = setInterval(() => {
+                grabacionSegundos++;
+                const minutos = Math.floor(grabacionSegundos / 60).toString().padStart(2, '0');
+                const segundos = (grabacionSegundos % 60).toString().padStart(2, '0');
+                voiceTimer.textContent = `${minutos}:${segundos}`;
+            }, 1000);
+        } catch (error) {
+            console.error("Error al acceder al micrófono:", error);
+            alert("No se pudo iniciar el micrófono. Por favor, asegúrate de otorgar permisos en tu navegador.");
+        }
     });
 
-    // Cancelar Nota de Voz
+    // Cancelar Nota de Voz en progreso
     btnCancelVoice.addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+        }
         clearInterval(grabacionInterval);
         voiceOverlay.classList.add("hidden");
+        audioChunks = [];
     });
 
-    // Enviar Nota de Voz
-    btnSendVoice.addEventListener("click", async () => {
-        clearInterval(grabacionInterval);
-        voiceOverlay.classList.add("hidden");
+    // Detener y Enviar Nota de Voz Real
+    btnSendVoice.addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.addEventListener("stop", async () => {
+                // Generar blob binario del archivo de audio grabado
+                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
 
-        // Simular que grabamos un blob de audio
-        // 1. Mostrar que el usuario mandó una nota de voz en pantalla
-        agregarMensajeAlChat("user", "🎤 [Nota de voz enviada - Procesando transcripción...]");
-        
-        // 2. Mostrar indicador de escritura
-        mostrarIndicadorEscritura();
+                // 1. Mostrar visualmente en pantalla que se envió un audio
+                agregarMensajeAlChat("user", "🎤 [Nota de voz enviada - Procesando transcripción...]");
 
-        // 3. Enviar al backend / mock
-        const resultado = await enviarAudioAlBackend(null);
+                // 2. Mostrar indicador de escritura
+                mostrarIndicadorEscritura();
 
-        // 4. Remover escritura
-        removerIndicadorEscritura();
+                // 3. Enviar el archivo binario real al servidor FastAPI
+                const resultado = await enviarAudioAlBackend(audioBlob);
 
-        // 5. Mostrar la transcripción que hizo Whisper
-        const mensajeTrans = chatMessages.lastElementChild;
-        if (mensajeTrans && mensajeTrans.classList.contains("user")) {
-            mensajeTrans.querySelector(".message-text").innerHTML = `🎤 _"${resultado.transcripcion}"_`;
+                // 4. Remover escritura
+                removerIndicadorEscritura();
+
+                // 5. Reemplazar la fila visual con la transcripción real que hizo Whisper en el backend
+                const allUserRows = chatMessages.querySelectorAll(".message-row.user");
+                if (allUserRows.length > 0) {
+                    const ultimoMensajeVoz = allUserRows[allUserRows.length - 1];
+                    ultimoMensajeVoz.querySelector(".message-text").innerHTML = `🎤 _"${resultado.transcripcion}"_`;
+                }
+
+                // 6. Mostrar respuesta vocal real de FinBot
+                agregarMensajeAlChat("agent", resultado.respuesta, resultado.archivo_audio, resultado.herramientas_usadas);
+            }, { once: true });
+
+            mediaRecorder.stop();
         }
 
-        // 6. Mostrar respuesta vocal de FinBot
-        agregarMensajeAlChat("agent", resultado.respuesta, resultado.conAudio);
+        clearInterval(grabacionInterval);
+        voiceOverlay.classList.add("hidden");
     });
 
     // --- 8. ACCIONES DE ENCABEZADO ---

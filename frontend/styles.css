@@ -10,20 +10,24 @@
     --bg-card-hover: rgba(35, 48, 78, 0.65);
     --border-glass: rgba(255, 255, 255, 0.07);
     --border-focus: rgba(16, 185, 129, 0.5);
-    
+
     /* Paleta de Colores Finanzas y Confianza */
-    --color-primary: #10b981; /* Verde Esmeralda (Crecimiento, Dinero) */
+    --color-primary: #10b981;
+    /* Verde Esmeralda (Crecimiento, Dinero) */
     --color-primary-glow: rgba(16, 185, 129, 0.25);
-    --color-secondary: #3b82f6; /* Azul Confianza (Seguridad) */
+    --color-secondary: #3b82f6;
+    /* Azul Confianza (Seguridad) */
     --color-secondary-glow: rgba(59, 130, 246, 0.25);
-    --color-accent: #8b5cf6; /* Violeta/Púrpura */
-    --color-danger: #ef4444; /* Rojo de Alerta */
-    
+    --color-accent: #8b5cf6;
+    /* Violeta/Púrpura */
+    --color-danger: #ef4444;
+    /* Rojo de Alerta */
+
     /* Colores de Texto */
     --text-main: #f3f4f6;
     --text-muted: #9ca3af;
     --text-dark: #111827;
-    
+
     /* Gradientes */
     --gradient-primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
     --gradient-secondary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -161,10 +165,12 @@ body {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
     }
+
     70% {
         transform: scale(1);
         box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
     }
+
     100% {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
@@ -221,8 +227,13 @@ body {
     color: #fff;
 }
 
-.btc-icon { background: linear-gradient(135deg, #f7931a 0%, #de7f13 100%); }
-.calc-icon { background: var(--gradient-secondary); }
+.btc-icon {
+    background: linear-gradient(135deg, #f7931a 0%, #de7f13 100%);
+}
+
+.calc-icon {
+    background: var(--gradient-secondary);
+}
 
 .tool-title {
     font-size: 13px;
@@ -272,8 +283,13 @@ body {
     font-weight: 500;
 }
 
-.btc-change-indicator.positive { color: var(--color-primary); }
-.btc-change-indicator.negative { color: var(--color-danger); }
+.btc-change-indicator.positive {
+    color: var(--color-primary);
+}
+
+.btc-change-indicator.negative {
+    color: var(--color-danger);
+}
 
 .mini-icon {
     width: 12px;
@@ -664,6 +680,7 @@ body {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -770,7 +787,8 @@ body {
 }
 
 .audio-progress {
-    width: 40%; /* Simulado */
+    width: 40%;
+    /* Simulado */
     height: 100%;
     background: var(--color-primary);
     border-radius: 2px;
@@ -806,12 +824,25 @@ body {
     animation: typingBounce 1.4s infinite ease-in-out both;
 }
 
-.typing-dot:nth-child(1) { animation-delay: -0.32s; }
-.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
 
 @keyframes typingBounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1.0); }
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1.0);
+    }
 }
 
 /* -------------------------------------------------------------
@@ -978,22 +1009,64 @@ body {
 }
 
 @keyframes bounceAudio {
-    0% { height: 8px; background-color: var(--color-secondary); }
-    100% { height: 50px; background-color: var(--color-primary); }
+    0% {
+        height: 8px;
+        background-color: var(--color-secondary);
+    }
+
+    100% {
+        height: 50px;
+        background-color: var(--color-primary);
+    }
 }
 
-.waveform-container .bar:nth-child(1) { animation-delay: 0.1s; }
-.waveform-container .bar:nth-child(2) { animation-delay: 0.3s; }
-.waveform-container .bar:nth-child(3) { animation-delay: 0.5s; }
-.waveform-container .bar:nth-child(4) { animation-delay: 0.2s; }
-.waveform-container .bar:nth-child(5) { animation-delay: 0.4s; }
-.waveform-container .bar:nth-child(6) { animation-delay: 0.6s; }
-.waveform-container .bar:nth-child(7) { animation-delay: 0.15s; }
-.waveform-container .bar:nth-child(8) { animation-delay: 0.35s; }
-.waveform-container .bar:nth-child(9) { animation-delay: 0.55s; }
-.waveform-container .bar:nth-child(10) { animation-delay: 0.25s; }
-.waveform-container .bar:nth-child(11) { animation-delay: 0.45s; }
-.waveform-container .bar:nth-child(12) { animation-delay: 0.65s; }
+.waveform-container .bar:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.waveform-container .bar:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.waveform-container .bar:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+.waveform-container .bar:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.waveform-container .bar:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.waveform-container .bar:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.waveform-container .bar:nth-child(7) {
+    animation-delay: 0.15s;
+}
+
+.waveform-container .bar:nth-child(8) {
+    animation-delay: 0.35s;
+}
+
+.waveform-container .bar:nth-child(9) {
+    animation-delay: 0.55s;
+}
+
+.waveform-container .bar:nth-child(10) {
+    animation-delay: 0.25s;
+}
+
+.waveform-container .bar:nth-child(11) {
+    animation-delay: 0.45s;
+}
+
+.waveform-container .bar:nth-child(12) {
+    animation-delay: 0.65s;
+}
 
 .voice-timer {
     font-size: 32px;
@@ -1090,8 +1163,15 @@ body {
 }
 
 @keyframes modalIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .modal-header {
@@ -1202,8 +1282,13 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Responsividad para pantallas pequeñas / móviles */
@@ -1211,8 +1296,100 @@ body {
     .app-container {
         grid-template-columns: 1fr;
     }
-    
+
     .sidebar {
-        display: none; /* En producción se puede añadir un menú hamburguesa, aquí optimizamos para foco de chat */
+        display: none;
+        /* En producción se puede añadir un menú hamburguesa, aquí optimizamos para foco de chat */
     }
+}
+
+/* Estilos para el Selector de Modo de Respuesta (Texto/Voz) */
+.response-mode-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    animation: fadeIn 0.4s ease;
+}
+
+.mode-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mode-selector {
+    display: flex;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-smooth);
+}
+
+.mode-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.mode-btn.active {
+    background: var(--gradient-primary);
+    color: #fff;
+    box-shadow: 0 2px 8px var(--color-primary-glow);
+}
+
+.mode-btn .mini-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* Estilos para los Badges de Herramientas Usadas */
+.tool-badge-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: var(--color-primary);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.05);
+    animation: fadeIn 0.3s ease;
+}
+
+.tool-badge strong {
+    font-weight: 700;
+    color: #fff;
+}
+
+.badge-icon {
+    width: 12px;
+    height: 12px;
 }
