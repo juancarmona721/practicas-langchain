@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- CONFIGURACIÓN DE CONEXIÓN BACKEND ---
     const CONFIG = {
-        backendUrl: "http://localhost:8000" // Puerto por defecto de FastAPI
+        backendUrl: "" // Uso de rutas relativas para soportar despliegues (Railway) y localhost
     };
 
     // --- SELECCIÓN DE ELEMENTOS DOM ---
