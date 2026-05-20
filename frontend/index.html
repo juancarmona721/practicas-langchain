@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinBot - Tu Asistente Financiero Inteligente</title>
+    <!-- Evitar error 404 de favicon -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <meta name="description"
         content="Interfaz premium interactiva para conversar con FinBot, tu consultor financiero inteligente impulsado por IA.">
     <!-- Google Fonts: Outfit -->
@@ -270,7 +272,8 @@ app.add_middleware(
                 <h4>2. Conexiones Disponibles en <code>app.js</code></h4>
                 <ul>
                     <li><code>enviarMensajeAlBackend(mensaje)</code> conecta con
-                        <code>GET /chat?mensaje_usuario=...</code></li>
+                        <code>GET /chat?mensaje_usuario=...</code>
+                    </li>
                     <li><code>enviarAudioAlBackend(blobAudio)</code> conecta con <code>POST /chat/audio</code></li>
                 </ul>
 
